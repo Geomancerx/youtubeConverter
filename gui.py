@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QRadioButton
 from PyQt5.QtGui import QIcon
 from pytube import YouTube
 from moviepy.editor import VideoFileClip
@@ -17,6 +17,11 @@ class VideoConverterGUI(QWidget):
         output_label = QLabel("Enter output file name and path:")
         self.output_entry = QLineEdit()
 
+        # Create the format label and radio buttons
+        format_label = QLabel("Select output format:")
+        self.mp4_radio = QRadioButton("MP4")
+        self.mp3_radio = QRadioButton("MP3")
+
         # Create the download button
         download_button = QPushButton("Download and Convert")
         download_button.clicked.connect(self.download_and_convert_video)
@@ -30,12 +35,15 @@ class VideoConverterGUI(QWidget):
         vbox.addWidget(self.url_entry)
         vbox.addWidget(output_label)
         vbox.addWidget(self.output_entry)
+        vbox.addWidget(format_label)
+        vbox.addWidget(self.mp4_radio)
+        vbox.addWidget(self.mp3_radio)
         vbox.addWidget(download_button)
         vbox.addWidget(self.status_label)
         self.setLayout(vbox)
 
         # Set the window properties
-        self.setGeometry(300, 300, 300, 200)
+        self.setGeometry(700, 700, 700, 200)
         self.setWindowTitle("YouTube Video Downloader and Converter")
         self.setWindowIcon(QIcon("icon.png"))
 
@@ -48,9 +56,18 @@ class VideoConverterGUI(QWidget):
         video = yt.streams.first()
         video.download()
 
-        # Convert the video to MP4 using MoviePy
+        # Convert the video to the selected format using MoviePy
+        if self.mp4_radio.isChecked():
+            codec = 'libx264'
+            extension = 'mp4'
+        elif self.mp3_radio.isChecked():
+            codec = 'libmp3lame'
+            extension = 'mp3'
+        else:
+            raise ValueError("No format selected")
+
         clip = VideoFileClip(video.default_filename)
-        clip.write_videofile(self.output_entry.text())
+        clip.write_videofile(self.output_entry.text() + '.' + extension, codec=codec)
 
         # Print a message to indicate that the conversion is complete
         self.status_label.setText("Video conversion complete!")

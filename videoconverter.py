@@ -1,17 +1,22 @@
-from pytube import YouTube
-from moviepy.editor import VideoFileClip
+# libraries
+import yt_dlp
 
-# Get the URL of the YouTube video
-url = "<link goes here>"
+# get the URL of the youtube video
+url = "https://www.youtube.com/watch?v=_D0ZQPqeJkk"
 
-# Download the video using PyTube
-yt = YouTube(url)
-video = yt.streams.first()
-video.download()
+# initialize the yt-dlp downloader
+ydl_opts = {
+    'format': 'bestvideo+bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegVideoConvertor',
+        'preferedformat': 'mp4',
+    }],
+}
 
-# Convert the video to MP4 using MoviePy
-clip = VideoFileClip(video.default_filename)
-clip.write_videofile("file/path/here/<desired name>.mp4")
+with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    info = ydl.extract_info(url, download=False)
+    video_title = info['title']
+    ydl.download([url])
 
-# Print a message to indicate that the conversion is complete
-print("Video conversion complete!")
+# print a message to indicate that the conversion is complete
+print(f"Video download complete: {video_title}.mp4")
